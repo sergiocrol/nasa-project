@@ -5,9 +5,9 @@ const {
   abortLaunchById,
 } = require("../../models/launches.model");
 
-function httpGetAllLaunches(req, res) {
+async function httpGetAllLaunches(req, res) {
   // Launches is a map, so we need to convert in something that the response can recognize, like an array
-  return res.status(200).json(getAllLaunches());
+  return res.status(200).json(await getAllLaunches());
 }
 
 function httpAddNewLaunch(req, res) {
@@ -59,7 +59,7 @@ function httpAbortLaunch(req, res) {
   const aborted = abortLaunchById(launchId);
   return res.status(200).json(aborted);
 }
-~
+
 module.exports = {
   httpGetAllLaunches,
   httpAddNewLaunch,

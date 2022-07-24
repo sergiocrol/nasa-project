@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { parse } = require("csv-parse");
 
-const habitablePlanets = [];
+const planets = require("./planets.mongo");
 
 function isHabitablePlanet(planet) {
   return (
@@ -28,12 +28,23 @@ function loadPlanetsData() {
           columns: true,
         })
       )
-      .on("data", (data) => {
+      .on("data", async (data) => {
         // We can use this received data (a line) as we want
         // This is gonna be saved as Buffers, that are collections of bytes. But we above's parse
         // function we have convert them into a readable content
         if (isHabitablePlanet(data)) {
-          habitablePlanets.push(data);
+          // insert + update = upsert -> If we just save the planets in our DB here, we'll duplicate
+          // the content in the DB, since this loadPlanetsData function is called everytime the server
+          // is started. That's why Mongoose give us this UPSERT feature, which is basically an insert
+          // but only if the document doesn't already exist
+          // await planets.create({
+          //   keplerName: data.kepler_name,
+          // });
+
+          // With updateOne, we pass as thee first argument what we want to find, in this case we want to find planets
+          // with certain name. In the second argument we pass with what we want to update the first document that matches
+          // with the first search query. The third arg is Upsert, which one we say only update if the planet already does not exist
+          savePlanet(data);
         }
       })
       .on("error", (err) => {
@@ -41,15 +52,36 @@ function loadPlanetsData() {
         console.log(err);
         reject();
       })
-      .on("end", () => {
-        console.log(`${habitablePlanets.length} habitable planets found!`);
+      .on("end", async () => {
+        const countPlanetsFound = (await getAllPlanets()).length;
+        console.log(`${countPlanetsFound} habitable planets found!`);
         resolve();
       });
   });
 }
 
-function getAllPlanets() {
-  return habitablePlanets;
+async function getAllPlanets() {
+  // if we pass an empty object, it means we want to get all documents of our collection
+  // otherwise, we could filter by passing different properties of the object (keplerName, etc.)
+  return await planets.find({}, { __v: 0, __id: 0 });
+}
+
+async function savePlanet(planet) {
+  try {
+    await planets.updateOne(
+      {
+        keplerName: planet.kepler_name,
+      },
+      {
+        keplerName: planet.kepler_name,
+      },
+      {
+        upsert: true,
+      }
+    );
+  } catch (err) {
+    console.error(`Could not save the planet ${err}`);
+  }
 }
 
 module.exports = {
