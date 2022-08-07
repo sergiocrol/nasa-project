@@ -25,7 +25,7 @@ describe("Launches API", () => {
       // we splitted up our server and our app.
       try {
         await request(app)
-          .get("/launches")
+          .get("/v1/launches")
           .expect("Content-Type", /json/)
           .expect(200);
       } catch (err) {
@@ -62,7 +62,7 @@ describe("Launches API", () => {
     test("It should respond with 201 success", async () => {
       try {
         const response = await request(app)
-          .post("/launches")
+          .post("/v1/launches")
           .send(completeLaunchData)
           .expect("Content-Type", /json/)
           .expect(201);
@@ -83,7 +83,7 @@ describe("Launches API", () => {
     test("It should catch missing required properties", async () => {
       try {
         const response = await request(app)
-          .post("/launches")
+          .post("/v1/launches")
           .send(launchDataWithoutDate)
           .expect("Content-Type", /json/)
           .expect(400);
@@ -99,7 +99,7 @@ describe("Launches API", () => {
     test("It should catch invalid dates", async () => {
       try {
         const response = await request(app)
-          .post("/launches")
+          .post("/v1/launches")
           .send(launchDataWithAnInvalidDate)
           .expect("Content-Type", /json/)
           .expect(400);

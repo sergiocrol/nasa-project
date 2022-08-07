@@ -3,10 +3,9 @@ const cors = require("cors");
 const path = require("path");
 const morgan = require("morgan");
 
-const app = express();
+const api = require("./routes/api");
 
-const planetsRouter = require("./routes/planets/planets.router");
-const launchesRouter = require("./routes/launches/launches.router");
+const app = express();
 
 // This middleware will be able to let us handle CORS that our server will allow
 app.use(
@@ -20,8 +19,11 @@ app.use(morgan("combined"));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-app.use("/planets", planetsRouter);
-app.use("/launches", launchesRouter);
+// We've extracted out our routes to the api file, so we can version it.
+// For that we import into api contant, and we use it through a middleware, where
+// firt parameter would be '/v1', that is gonna prepend all the routes from our api.
+app.use("/v1", api);
+
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });

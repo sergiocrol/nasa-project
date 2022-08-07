@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 
-const MONGO_URL =
-  "mongodb+srv://nasa-api:mrxRjjR7TKgLlUD8@cluster0.4t1vttg.mongodb.net/nasa?retryWrites=true&w=majority";
+require("dotenv").config();
+
+const MONGO_URL = process.env.MONGO_URL;
 
 // This "on" is an "eventEmitter" that notifies us every time an action happens in our app
 // Or "once in the case of "open" event, since we know it will only be triggered once".
